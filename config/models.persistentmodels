@@ -7,28 +7,28 @@ User
     UniqueEmail         email
     password            Text
 
--- BookStatus
---     statusName          Text
+BookStatus
+    statusName          Text
 
--- BookCategory
---     categoryName        Text
+Category
+    categoryName        Text
 
--- Book
---     name                Text
---     ISBN                Text
---     numberPages         Int
---     categoryId          BookCategoryId
+Book
+    name                Text
+    isbn                Text
+    numberPages         Int
+    categoryId          CategoryId
 
--- BookLibrary
---     userId              UserId
---     book                BookId
---     bookStatusId        BookStatusId
+BookLibrary
+    userId              UserId
+    book                BookId
+    bookStatusId        BookStatusId
 
--- BookRecord
---     dateIntervalStart   UTCTime
---     dateIntervalEnd     UTCTime
---     annotations         Text
---     pageAmountStart     Int
---     pageAmountEnd       Int
---     bookLibraryId       BookLibraryId
+BookRecord
+    dateIntervalStart   UTCTime
+    dateIntervalEnd     UTCTime
+    annotations         Text
+    pageAmountStart     Int
+    pageAmountEnd       Int
+    bookLibraryId       BookLibraryId
 
