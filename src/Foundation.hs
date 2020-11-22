@@ -12,9 +12,13 @@ module Foundation where
 
 import Import.NoFoundation
 import Database.Persist.Sql (ConnectionPool, runSqlPool)
+import Text.Lucius          (luciusFile)
+import Text.Hamlet          (hamletFile)
 
 import Yesod.Core.Types     (Logger)
 import qualified Yesod.Core.Unsafe as Unsafe
+import qualified Data.CaseInsensitive as CI
+import qualified Data.Text.Encoding as TE
 
 -- | The foundation datatype for your application. This can be a good place to
 -- keep settings and values requiring initialization before your application
@@ -27,6 +31,16 @@ data App = App
     , appHttpManager :: Manager
     , appLogger      :: Logger
     }
+
+data MenuItem = MenuItem
+    { menuItemLabel :: Text
+    , menuItemRoute :: Route App
+    , menuItemAccessCallback :: Bool
+    }
+
+data MenuTypes
+    = NavbarLeft MenuItem
+    | NavbarRight MenuItem
 
 -- This is where we define all of the routes in our application. For a full
 -- explanation of the syntax, please see:
@@ -57,6 +71,68 @@ instance RenderMessage App FormMessage where
 -- Please see the documentation for the Yesod typeclass. There are a number
 -- of settings which can be configured by overriding methods here.
 instance Yesod App where
+    -- the profile route requires that the user is authenticated, so we
+    -- delegate to that function
+    -- isAuthorized ProfileR _ = isAuthenticated
+
+    defaultLayout :: Widget -> Handler Html
+    defaultLayout widget = do
+        master <- getYesod
+
+        muser <- lookupSession "_ID"
+        mcurrentRoute <- getCurrentRoute
+
+        -- Get the breadcrumbs, as defined in the YesodBreadcrumbs instance.
+        (title, parents) <- breadcrumbs
+
+        -- Define the menu items of the header.
+        let menuItems =
+                [ NavbarLeft $ MenuItem
+                    { menuItemLabel = "Home"
+                    , menuItemRoute = HomeR
+                    , menuItemAccessCallback = True
+                    }
+                , NavbarRight $ MenuItem
+                    { menuItemLabel = "Login"
+                    , menuItemRoute = LoginR
+                    , menuItemAccessCallback = isNothing muser
+                    }
+                , NavbarRight $ MenuItem
+                    { menuItemLabel = "Logout"
+                    , menuItemRoute = LogoutR
+                    , menuItemAccessCallback = isJust muser
+                    }
+                ]
+
+        let navbarLeftMenuItems = [x | NavbarLeft x <- menuItems]
+        let navbarRightMenuItems = [x | NavbarRight x <- menuItems]
+
+        let navbarLeftFilteredMenuItems = [x | x <- navbarLeftMenuItems, menuItemAccessCallback x]
+        let navbarRightFilteredMenuItems = [x | x <- navbarRightMenuItems, menuItemAccessCallback x]
+
+        -- We break up the default layout into two components:
+        -- default-layout is the contents of the body tag, and
+        -- default-layout-wrapper is the entire page. Since the final
+        -- value passed to hamletToRepHtml cannot be a widget, this allows
+        -- you to use normal widget features in default-layout.
+
+        pc <- widgetToPageContent $ do
+            addStylesheet $ StaticR css_bootstrap_css
+            toWidgetHead $(luciusFile "templates/default-layout-wrapper.lucius")
+            $(widgetFile "default-layout")
+        withUrlRenderer $(hamletFile "templates/default-layout-wrapper.hamlet")
+
+-- Define breadcrumbs.
+instance YesodBreadcrumbs App where
+    -- Takes the route that the user is currently on, and returns a tuple
+    -- of the 'Text' that you want the label to display, and a previous
+    -- breadcrumb route.
+    breadcrumb
+        :: Route App  -- ^ The route the user is visiting currently.
+        -> Handler (Text, Maybe (Route App))
+    breadcrumb HomeR = return ("Home", Nothing)
+    breadcrumb (LoginR) = return ("Login", Just HomeR)
+    breadcrumb  _ = return ("home", Nothing)
 
 instance YesodPersist App where
     type YesodPersistBackend App = SqlBackend
@@ -65,6 +141,13 @@ instance YesodPersist App where
         master <- getYesod
         runSqlPool action $ appConnPool master    
 
+-- | Access function to determine if a user is logged in.
+isAuthenticated :: Handler AuthResult
+isAuthenticated = do
+    msession <- lookupSession "_ID"
+    return $ case msession of
+        Nothing -> Unauthorized "You must login to access this page"
+        Just _ -> Authorized
 
 unsafeHandler :: App -> Handler a -> IO a
 unsafeHandler = Unsafe.fakeHandlerGetLogger appLogger
