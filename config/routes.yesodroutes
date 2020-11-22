@@ -7,3 +7,8 @@
 /robots.txt RobotsR GET
 
 / HomeR GET
+
+/auth/signin LoginR GET POST
+/auth/signout LogoutR GET
+
+/auth/signup UserR GET POST

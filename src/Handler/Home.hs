@@ -10,6 +10,7 @@ import Import
 getHomeR :: Handler Html
 getHomeR = 
     defaultLayout $ do
+        session <- lookupSession "_ID"
         addStylesheet $ StaticR css_bootstrap_css
         setTitle "BookRecorder - Home"
         $(widgetFile "pages/homepage")

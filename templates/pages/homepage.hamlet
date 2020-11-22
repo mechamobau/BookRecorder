@@ -1,5 +1,5 @@
 <div .container-fluid>
-  <nav .navbar .navbar-default style="margin-top: 15px">
+  <nav .navbar .navbar-fixed .navbar-default style="margin-top: 15px">
     <div .container-fluid">
       <div .navbar-header>
         <button type="button" .navbar-toggle .collapsed data-toggle="collapse" data-target="#bs-example-navbar-collapse-1" aria-expanded="false">
@@ -11,15 +11,17 @@
         <a .navbar-brand href=@{HomeR}>BookRecorder
 
       <ul .nav .navbar-nav .navbar-left>
-        <li>
-          <a href="">Teste
 
       <ul .nav .navbar-nav .navbar-right>
         <li>
-          <a href="#" role="button">Login
+          $maybe _ <- session
+            <a href=@{LogoutR} role="button">Logout
+          $nothing
+            <a href=@{LoginR} role="button">Login
+
 
 <div .container>
   <div .jumbotron>
     <h1>Hello, world!
     <p>
-      <a .btn .btn-primary href="#" role="button">Fazer cadastro
+      <a .btn .btn-primary href=@{UserR} role="button">Fazer cadastro

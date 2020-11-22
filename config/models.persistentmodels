@@ -4,6 +4,7 @@
 User
     name                Text
     email               Text
+    UniqueEmail         email
     password            Text
 
 -- BookStatus

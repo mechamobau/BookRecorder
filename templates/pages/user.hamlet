@@ -1,0 +1,10 @@
+<div .container>
+    <div class="page-header">
+      <h1>Cadastro
+
+    $maybe msg' <- msg
+        #{msg'}
+
+    <form action=@{UserR} method=post>
+        ^{formWidget}
+        <input type=submit .btn .btn-primary .btn-block value=Cadastrar>
