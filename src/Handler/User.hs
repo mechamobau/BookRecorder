@@ -9,10 +9,15 @@ module Handler.User where
 import Import
 import Yesod.Form.Bootstrap3 (BootstrapFormLayout (..), renderBootstrap3)
 
+data RegularUser = RegularUser {
+        regularUserName        :: Text
+    ,   regularUserEmail       :: Text
+    ,   regularUserPassword    :: Text
+}
 
-formUserLoginForm :: Form (User, Text)
+formUserLoginForm :: Form (RegularUser, Text)
 formUserLoginForm = renderBootstrap3 BootstrapBasicForm $ (,)
-    <$> (User 
+    <$> (RegularUser 
         <$> areq textField (FieldSettings "Nome" Nothing Nothing Nothing [("class", "form-control")]) Nothing
         <*> areq textField (FieldSettings "Email" Nothing Nothing Nothing [("class", "form-control")]) Nothing
         <*> areq passwordField (FieldSettings "Senha" Nothing Nothing Nothing [("class", "form-control")]) Nothing
@@ -36,7 +41,7 @@ postUserR = do
     ((result, _), _) <- runFormPost formUserLoginForm
     case result of
         FormSuccess (user, password_confirm) -> do
-            user' <- runDB $ getBy (UniqueEmail $ userEmail user)
+            user' <- runDB $ getBy (UniqueEmail $ regularUserEmail user)
             case user' of
                 Just _ -> do
                         setMessage [shamlet|
@@ -45,8 +50,8 @@ postUserR = do
                         |] 
                         redirect UserR
                 Nothing -> do
-                    if (password_confirm == userPassword user) then do
-                        _ <- runDB $ insert400 user
+                    if (password_confirm == regularUserPassword user) then do
+                        _ <- runDB $ insert400 (User (regularUserName user) (regularUserEmail user) (regularUserPassword user) False )
                         setMessage [shamlet|
                             <div .alert .alert-success role=alert>
                                 <p><strong>Sucesso!</strong> Você foi cadastrado com sucesso, para continuar insira seu e-mail e senha abaixo

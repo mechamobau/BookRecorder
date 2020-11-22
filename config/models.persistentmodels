@@ -6,6 +6,7 @@ User
     email               Text
     UniqueEmail         email
     password            Text
+    isAdmin             Bool    False
 
 BookStatus
     statusName          Text

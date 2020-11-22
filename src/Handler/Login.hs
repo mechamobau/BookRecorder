@@ -39,7 +39,7 @@ postLoginR = do
         FormSuccess (UserLoginForm loginEmail loginPassword) -> do
             user' <- runDB $ getBy (UniqueEmail loginEmail)
             case user' of
-                Just (Entity _ (User _ _ password')) -> do
+                Just (Entity _ (User _ _ password' _)) -> do
                     if (loginPassword == password') then do
                         setSession "_ID" loginEmail
                         redirect DashboardR
