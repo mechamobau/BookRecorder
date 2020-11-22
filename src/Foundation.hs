@@ -90,7 +90,12 @@ instance Yesod App where
                 [ NavbarLeft $ MenuItem
                     { menuItemLabel = "Home"
                     , menuItemRoute = HomeR
-                    , menuItemAccessCallback = True
+                    , menuItemAccessCallback = isNothing muser
+                    }
+                , NavbarLeft $ MenuItem
+                    { menuItemLabel = "Dashboard"
+                    , menuItemRoute = DashboardR
+                    , menuItemAccessCallback = isJust muser
                     }
                 , NavbarRight $ MenuItem
                     { menuItemLabel = "Login"
@@ -132,6 +137,7 @@ instance YesodBreadcrumbs App where
         -> Handler (Text, Maybe (Route App))
     breadcrumb HomeR = return ("Home", Nothing)
     breadcrumb (LoginR) = return ("Login", Just HomeR)
+    breadcrumb (UserR) = return ("Cadastro", Just HomeR)
     breadcrumb  _ = return ("home", Nothing)
 
 instance YesodPersist App where

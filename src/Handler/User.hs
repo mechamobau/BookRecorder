@@ -29,7 +29,6 @@ getUserR = do
             Just _ -> redirect HomeR
             Nothing -> do
                 setTitle "BookRecorder - Entrar"
-                addStylesheet $ StaticR css_bootstrap_css            
                 $(widgetFile "pages/user")
 
 postUserR :: Handler Html

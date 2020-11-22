@@ -30,7 +30,6 @@ getLoginR = do
             Just _ -> redirect HomeR
             Nothing -> do
                 setTitle "BookRecorder - Entrar"
-                addStylesheet $ StaticR css_bootstrap_css            
                 $(widgetFile "pages/login")
 
 postLoginR :: Handler Html
@@ -43,7 +42,7 @@ postLoginR = do
                 Just (Entity _ (User _ _ password')) -> do
                     if (loginPassword == password') then do
                         setSession "_ID" loginEmail
-                        redirect HomeR
+                        redirect DashboardR
                     else do
                         setMessage [shamlet|
                             <div .alert .alert-danger role=alert>
