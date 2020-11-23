@@ -21,4 +21,4 @@ $else
                     <td><a href=@{BookR bookid}>#{bookName book}
                     <td>#{bookIsbn book}
                     <td>#{bookNumberPages book}
-                    <td>^{showBlogCategory book}
+                    <td>^{showBookCategory book}

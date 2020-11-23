@@ -24,8 +24,8 @@ getBookListR = do
                         $(widgetFile "pages/book/list")
 
 
-showBlogCategory :: Book -> Widget
-showBlogCategory book = do
+showBookCategory :: Book -> Widget
+showBookCategory book = do
     (Category name) <- handlerToWidget $ runDB $ get404 $ bookCategoryId book
     [whamlet|
         #{name}

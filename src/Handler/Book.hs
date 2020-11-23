@@ -10,6 +10,8 @@ import Import
 import Yesod.Form.Bootstrap3 (BootstrapFormLayout (..), renderBootstrap3)
 import Text.Julius
 
+import Handler.BookList (showBookCategory)
+
 -- Book
 --     name                Text
 --     isbn                Text
@@ -42,17 +44,24 @@ getBookR bookid = do
     book <- runDB $ get404 bookid
     categories <- runDB $ selectList [] [Desc CategoryId]
     (formWidget, _) <- generateFormPost $ formBook book $ mapCategories categories
+    muser <- lookupSession "_ID"    
+    case muser of
+        Nothing -> redirect HomeR
+        Just email -> do
+            user   <- runDB $ selectFirst [UserEmail ==. email] []
+            case user of
+                Nothing -> redirect HomeR
+                Just (Entity _ ( User _ _ _ isAdmin' )) ->                 
+                    defaultLayout $ do
+                        msg <- getMessage
+                        session <- lookupSession "_ID"
 
-    defaultLayout $ do
-        msg <- getMessage
-        session <- lookupSession "_ID"
-
-        case session of
-            Just _ -> do
-                setTitle "BookRecorder - Cadastrar Livro"
-                toWidgetBody $(juliusFile "templates/pages/book/show.julius")
-                $(widgetFile "pages/book/show")
-            Nothing -> redirect HomeR
+                        case session of
+                            Just _ -> do
+                                setTitle "BookRecorder - Cadastrar Livro"
+                                toWidgetBody $(juliusFile "templates/pages/book/show.julius")
+                                $(widgetFile "pages/book/show")
+                            Nothing -> redirect HomeR
     
 
 postBookR :: Key Book -> Handler Html
