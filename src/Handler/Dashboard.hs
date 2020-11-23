@@ -7,7 +7,6 @@
 module Handler.Dashboard where
 
 import Import
-import Yesod.Form.Bootstrap3 (BootstrapFormLayout (..), renderBootstrap3)
 
 getDashboardR :: Handler Html
 getDashboardR =

@@ -1,0 +1,3 @@
+<form action=@{BookNewR} method=post>
+    ^{formWidget}
+    <input type=submit .btn.btn-default value="Cadastrar Livro">

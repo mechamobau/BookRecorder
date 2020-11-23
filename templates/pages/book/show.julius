@@ -1,0 +1,12 @@
+$(window).load(function() {
+    $("#deleteBook").click(function() {
+        if (confirm("Tem certeza que deseja apagar o livro? Está ação é PERMANENTE")) {
+            $.ajax({
+                url: "@{BookR bookid}",
+                method: "DELETE"
+            }).done(function() {
+                window.location.replace("@{BookListR}");
+            });
+        }
+    });
+});

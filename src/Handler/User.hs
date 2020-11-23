@@ -52,11 +52,9 @@ postUserR = do
                 Nothing -> do
                     if (password_confirm == regularUserPassword user) then do
                         _ <- runDB $ insert400 (User (regularUserName user) (regularUserEmail user) (regularUserPassword user) False )
-                        setMessage [shamlet|
-                            <div .alert .alert-success role=alert>
-                                <p><strong>Sucesso!</strong> Você foi cadastrado com sucesso, para continuar insira seu e-mail e senha abaixo
-                        |]
-                        redirect LoginR
+                        
+                        setSession "_ID" (regularUserEmail user)
+                        redirect DashboardR
                     else do
                         setMessage [shamlet|
                             <div .alert .alert-warning role=alert>

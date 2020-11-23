@@ -14,7 +14,7 @@ import Import.NoFoundation
 import Database.Persist.Sql (ConnectionPool, runSqlPool)
 import Text.Lucius          (luciusFile)
 import Text.Hamlet          (hamletFile)
-
+import Data.Text    
 import Yesod.Core.Types     (Logger)
 import qualified Yesod.Core.Unsafe as Unsafe
 import qualified Data.CaseInsensitive as CI
@@ -71,9 +71,38 @@ instance RenderMessage App FormMessage where
 -- Please see the documentation for the Yesod typeclass. There are a number
 -- of settings which can be configured by overriding methods here.
 instance Yesod App where
+    
+    -- Controls the base of generated URLs. For more information on modifying,
+    -- see: https://github.com/yesodweb/yesod/wiki/Overriding-approot
+    approot :: Approot App
+    approot = ApprootRelative
+
+    -- Store session data on the client in encrypted cookies,
+    -- default session idle timeout is 120 minutes
+    makeSessionBackend :: App -> IO (Maybe SessionBackend)
+    makeSessionBackend _ = Just <$> defaultClientSessionBackend
+        120    -- timeout in minutes
+        "app/client_session_key.aes"
+
     -- the profile route requires that the user is authenticated, so we
     -- delegate to that function
-    -- isAuthorized ProfileR _ = isAuthenticated
+    isAuthorized
+        :: Route App  -- ^ The route the user is visiting.
+        -> Bool       -- ^ Whether or not this is a "write" request.
+        -> Handler AuthResult
+    -- Routes not requiring authentication.
+    isAuthorized RedirectAppR _ = return Authorized
+    isAuthorized (StaticR _) _ = return Authorized
+    isAuthorized BookListR _ = return Authorized
+    isAuthorized FaviconR _ = return Authorized
+    isAuthorized RobotsR _ = return Authorized
+    isAuthorized LogoutR _ = return Authorized
+    isAuthorized LoginR _ = return Authorized
+    isAuthorized HomeR _ = return Authorized
+    isAuthorized UserR _ = return Authorized
+    isAuthorized (BookR _) _ = return Authorized
+    isAuthorized BookNewR _ = isAdmin
+    isAuthorized DashboardR _ = isAuthenticated
 
     defaultLayout :: Widget -> Handler Html
     defaultLayout widget = do
@@ -95,6 +124,11 @@ instance Yesod App where
                 , NavbarLeft $ MenuItem
                     { menuItemLabel = "Dashboard"
                     , menuItemRoute = DashboardR
+                    , menuItemAccessCallback = isJust muser
+                    }
+                , NavbarLeft $ MenuItem
+                    { menuItemLabel = "Livros"
+                    , menuItemRoute = BookListR
                     , menuItemAccessCallback = isJust muser
                     }
                 , NavbarRight $ MenuItem
@@ -127,6 +161,23 @@ instance Yesod App where
             $(widgetFile "default-layout")
         withUrlRenderer $(hamletFile "templates/default-layout-wrapper.hamlet")
 
+isAdmin :: Handler AuthResult
+isAdmin = do
+    muser <- lookupSession "_ID"
+    case muser of
+        Nothing -> return AuthenticationRequired
+        Just email -> do
+            user   <- runDB $ selectFirst [UserEmail ==. email] []
+            case user of
+                Just (Entity _ (User _ _ _ isAdmin')) -> do 
+                    if ( isAdmin' == True ) then 
+                        return Authorized 
+                    else 
+                        return $ Unauthorized "You must be an admin"
+                Nothing -> return $ Unauthorized "You must be an admin"
+            -- Authorized
+        -- Just _ -> return Unauthorized "You must be an admin"
+
 -- Define breadcrumbs.
 instance YesodBreadcrumbs App where
     -- Takes the route that the user is currently on, and returns a tuple
@@ -136,8 +187,12 @@ instance YesodBreadcrumbs App where
         :: Route App  -- ^ The route the user is visiting currently.
         -> Handler (Text, Maybe (Route App))
     breadcrumb HomeR = return ("Home", Nothing)
-    breadcrumb (LoginR) = return ("Login", Just HomeR)
-    breadcrumb (UserR) = return ("Cadastro", Just HomeR)
+    breadcrumb LoginR = return ("Login", Just HomeR)
+    breadcrumb UserR = return ("Cadastro", Just HomeR)
+    breadcrumb BookListR = return ("Livros", Just HomeR)
+    breadcrumb BookNewR = return ("Cadastrar Livro", Just BookListR)
+    --  ++ (fromString $ show bookid)
+    breadcrumb (BookR _) = return ("Livro", Just BookListR)
     breadcrumb  _ = return ("home", Nothing)
 
 instance YesodPersist App where

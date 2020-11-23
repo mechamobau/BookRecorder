@@ -12,13 +12,14 @@ BookStatus
     statusName          Text
 
 Category
-    categoryName        Text
+    name        Text
 
-Book
+Book    json
     name                Text
     isbn                Text
     numberPages         Int
     categoryId          CategoryId
+    deriving Show
 
 BookLibrary
     userId              UserId

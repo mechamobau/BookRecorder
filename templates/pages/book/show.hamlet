@@ -1,0 +1,4 @@
+<form action=@{BookR bookid} method=post>
+    ^{formWidget}
+    <input type=submit .btn.btn-default value="Atualizar Livro">
+    <a #deleteBook .btn.btn-danger.pull-right>Apagar Livro

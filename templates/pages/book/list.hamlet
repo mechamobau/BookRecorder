@@ -1,0 +1,24 @@
+<h1>Livros
+
+$if isAdmin' == True
+    <a href=@{BookNewR} .btn.btn-primary.pull-right style="margin-bottom: 20px"> Cadastrar Livro
+
+$if length books == 0
+    <p> 
+        Não existem livros no momento
+        $if isAdmin' == False
+            , contate o administrador
+$else
+    <table .table.table-striped.table-hover>
+        <thead>
+            <th>Nome do livro
+            <th>ISBN
+            <th>Número de páginas
+            <th>Categoria
+        <tbody>
+            $forall Entity bookid book <- books
+                <tr attr=#{show bookid}>                    
+                    <td><a href=@{BookR bookid}>#{bookName book}
+                    <td>#{bookIsbn book}
+                    <td>#{bookNumberPages book}
+                    <td>^{showBlogCategory book}
