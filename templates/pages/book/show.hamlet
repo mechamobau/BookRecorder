@@ -1,8 +1,8 @@
 $if isAdmin' == True
     <form action=@{BookR bookid} method=post>
         ^{formWidget}
-        <input type=submit .btn.btn-default value="Atualizar Livro">
-        <a #deleteBook .btn.btn-danger.pull-right>Apagar Livro
+        <a #deleteBook .btn.btn-danger>Apagar Livro
+        <input type=submit .btn.btn-default.pull-right value="Atualizar Livro">
 $else
     <div .form-group>
         <label>Nome do livro:
@@ -15,4 +15,4 @@ $else
         <p>#{bookNumberPages book}
     <div .form-group>
         <label>Categoria:
-        <p>^{showBookCategory book}        
+        <p>^{showBookCategory book}
