@@ -18,13 +18,14 @@ Book    json
     name                Text
     isbn                Text
     numberPages         Int
-    categoryId          CategoryId
+    description         Text            Maybe
+    category            CategoryId
     deriving Show
 
 BookLibrary
-    userId              UserId
+    user                UserId
     book                BookId
-    bookStatusId        BookStatusId
+    status              BookStatusId
 
 BookRecord
     dateIntervalStart   UTCTime
@@ -32,5 +33,5 @@ BookRecord
     annotations         Text
     pageAmountStart     Int
     pageAmountEnd       Int
-    bookLibraryId       BookLibraryId
+    bookLibrary         BookLibraryId
 

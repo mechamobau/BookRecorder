@@ -31,7 +31,7 @@ formBook book categories = renderBootstrap3 BootstrapBasicForm $ NewBook
     <$> areq textField (FieldSettings "Nome do livro" Nothing Nothing Nothing [("class", "form-control")]) (Just $ bookName book)
     <*> areq textField (FieldSettings "ISBN" Nothing Nothing Nothing [("class", "form-control")]) (Just $ bookIsbn book)
     <*> areq intField (FieldSettings "Número de páginas" Nothing Nothing Nothing [("class", "form-control")]) (Just $ bookNumberPages book)
-    <*> areq (selectFieldList categories) (FieldSettings "Categoria do Livro" Nothing Nothing Nothing [("class", "form-control")]) (Just $ bookCategoryId book)
+    <*> areq (selectFieldList categories) (FieldSettings "Categoria do Livro" Nothing Nothing Nothing [("class", "form-control")]) (Just $ bookCategory book)
 
 mapCategories :: [Entity Category] -> [(Text, Key Category)]
 mapCategories [] = []
@@ -53,7 +53,6 @@ getBookR bookid = do
                 Nothing -> redirect HomeR
                 Just (Entity _ ( User _ _ _ isAdmin' )) ->                 
                     defaultLayout $ do
-                        msg <- getMessage
                         session <- lookupSession "_ID"
 
                         case session of
@@ -71,7 +70,7 @@ postBookR bookid = do
     ((result, _), _) <- runFormPost $ formBook book $ mapCategories categories
     case result of
         FormSuccess book' -> do
-            _ <- runDB $ update bookid [BookName =. (newBookName book'), BookIsbn =. (newBookISBN book'), BookNumberPages =. (newBookNumberPages book'), BookCategoryId =. (newBookCategory book')]
+            _ <- runDB $ update bookid [BookName =. newBookName book', BookIsbn =. newBookISBN book', BookNumberPages =. newBookNumberPages book', BookCategory =. newBookCategory book']
             redirect BookListR
             -- _ <- runDB $ insert user
         _ -> redirect $ BookR bookid

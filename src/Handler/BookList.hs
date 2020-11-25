@@ -26,7 +26,7 @@ getBookListR = do
 
 showBookCategory :: Book -> Widget
 showBookCategory book = do
-    (Category name) <- handlerToWidget $ runDB $ get404 $ bookCategoryId book
+    (Category name) <- handlerToWidget $ runDB $ get404 $ bookCategory book
     [whamlet|
         #{name}
     |]
