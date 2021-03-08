@@ -6,8 +6,10 @@
 {-# LANGUAGE QuasiQuotes #-}
 module Handler.BookNew where
 
-import Import
+import Import as I
 import Yesod.Form.Bootstrap3 (BootstrapFormLayout (..), renderBootstrap3)
+
+import Data.Text as T (pack)
 
 -- Book
 --     name                Text
@@ -64,7 +66,14 @@ postBookNewR = do
             case book' of
                 Just _ -> redirect BookNewR
                 Nothing -> do
-                    _ <- runDB $ insert400 (Book (newBookName book) (newBookISBN book) (newBookNumberPages book) (newBookCategory book))
+                    _ <- runDB $ insert400 (
+                        Book 
+                        (newBookName book) 
+                        (newBookISBN book) 
+                        (newBookNumberPages book) 
+                        (Just $ T.pack "")
+                        (newBookCategory book)
+                        )
                     redirect BookListR
             -- _ <- runDB $ insert user
         _ -> redirect BookNewR
