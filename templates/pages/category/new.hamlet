@@ -1,0 +1,3 @@
+<form action=@{CategoryNewR} method=post>
+    ^{formWidget}
+    <input type=submit .btn.btn-default value="Cadastrar Categoria">

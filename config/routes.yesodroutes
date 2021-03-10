@@ -3,17 +3,21 @@
 
 /static StaticR Static appStatic
 
-/favicon.ico        FaviconR        GET
-/robots.txt         RobotsR         GET
+/favicon.ico            FaviconR        GET
+/robots.txt             RobotsR         GET
 
-/                   HomeR           GET
+/                       HomeR           GET
 
-/auth/signin        LoginR          GET POST
-/auth/signout       LogoutR         GET
-/auth/signup        UserR           GET POST
+/auth/signin            LoginR          GET POST
+/auth/signout           LogoutR         GET
+/auth/signup            UserR           GET POST
 
-/app                RedirectAppR    GET
-/app/books          BookListR       GET
-/app/books/new      BookNewR        GET POST 
-!/app/books/#BookId  BookR          GET POST DELETE
-/app/dashboard      DashboardR      GET
+/app                    RedirectAppR    GET
+/app/books              BookListR       GET
+/app/books/new          BookNewR        GET POST 
+!/app/books/#BookId     BookR           GET POST DELETE
+
+/app/category           CategoryListR   GET
+/app/category/new       CategoryNewR    GET POST
+
+/app/dashboard          DashboardR      GET

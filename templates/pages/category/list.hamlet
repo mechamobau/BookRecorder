@@ -1,0 +1,19 @@
+<div .col-md-8 .col-xs-12>
+    <h1 .title>Categorias
+
+<div .col-md-4 .col-xs-12>
+    <a href=@{CategoryNewR} .btn.btn-primary.pull-right style="margin-bottom: 20px"> Cadastrar Categoria
+
+$if length categories == 0
+    <div .col-xs-12>
+        <p> 
+            Não existem categorias no momento, insira uma nova
+$else
+    <div .col-xs-12>
+        <table .table.table-striped.table-hover>
+            <thead>
+                <th>Nome da categoria
+            <tbody>
+                $forall Entity categoryId category <- categories
+                    <tr attr=#{show categoryId}>                    
+                        <td><a>#{categoryName category}
