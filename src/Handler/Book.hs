@@ -4,6 +4,7 @@
 {-# LANGUAGE MultiParamTypeClasses #-}
 {-# LANGUAGE TypeFamilies #-}
 {-# LANGUAGE QuasiQuotes #-}
+
 module Handler.Book where
 
 import Import
@@ -12,12 +13,6 @@ import Text.Julius
 
 import Handler.BookList (showBookCategory)
 
--- Book
---     name                Text
---     isbn                Text
---     numberPages         Int
---     categoryId          CategoryId
-
 data NewBook = NewBook {
         newBookName             :: Text
     ,   newBookISBN             :: Text
@@ -25,7 +20,6 @@ data NewBook = NewBook {
     ,   newBookCategory         :: Key Category
 }
 
--- formBook :: Form NewBook
 formBook :: Book -> [(Text, Key Category)] -> Form NewBook
 formBook book categories = renderBootstrap3 BootstrapBasicForm $ NewBook
     <$> areq textField (FieldSettings "Nome do livro" Nothing Nothing Nothing [("class", "form-control")]) (Just $ bookName book)
