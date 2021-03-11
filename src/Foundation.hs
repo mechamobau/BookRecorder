@@ -14,7 +14,6 @@ import Import.NoFoundation
 import Database.Persist.Sql (ConnectionPool, runSqlPool)
 import Text.Lucius          (luciusFile)
 import Text.Hamlet          (hamletFile)
-import Data.Text    
 import Yesod.Core.Types     (Logger)
 import qualified Yesod.Core.Unsafe as Unsafe
 import qualified Data.CaseInsensitive as CI
@@ -91,18 +90,27 @@ instance Yesod App where
         -> Bool       -- ^ Whether or not this is a "write" request.
         -> Handler AuthResult
     -- Routes not requiring authentication.
-    isAuthorized RedirectAppR _ = return Authorized
-    isAuthorized (StaticR _) _ = return Authorized
+    -- Books
+    isAuthorized (BookR _) _ = return Authorized
     isAuthorized BookListR _ = return Authorized
-    isAuthorized FaviconR _ = return Authorized
-    isAuthorized RobotsR _ = return Authorized
+    isAuthorized BookNewR _ = return Authorized
+    -- Category
+    isAuthorized (CategoryR _) _ = return Authorized
+    isAuthorized CategoryNewR _ = return Authorized
+    isAuthorized CategoryListR _ = return Authorized
+    -- Dashboard
+    isAuthorized DashboardR _ = isAuthenticated
+    -- Auth
     isAuthorized LogoutR _ = return Authorized
     isAuthorized LoginR _ = return Authorized
-    isAuthorized HomeR _ = return Authorized
     isAuthorized UserR _ = return Authorized
-    isAuthorized (BookR _) _ = return Authorized
-    isAuthorized BookNewR _ = isAdmin
-    isAuthorized DashboardR _ = isAuthenticated
+    -- Home
+    isAuthorized HomeR _ = return Authorized
+    -- Global
+    isAuthorized RedirectAppR _ = return Authorized
+    isAuthorized (StaticR _) _ = return Authorized
+    isAuthorized FaviconR _ = return Authorized
+    isAuthorized RobotsR _ = return Authorized
 
     defaultLayout :: Widget -> Handler Html
     defaultLayout widget = do
@@ -131,6 +139,11 @@ instance Yesod App where
                     , menuItemRoute = BookListR
                     , menuItemAccessCallback = isJust muser
                     }
+                , NavbarLeft $ MenuItem
+                    { menuItemLabel = "Categorias de Livros"
+                    , menuItemRoute = CategoryListR
+                    , menuItemAccessCallback = isJust muser
+                    }
                 , NavbarRight $ MenuItem
                     { menuItemLabel = "Login"
                     , menuItemRoute = LoginR
@@ -157,6 +170,7 @@ instance Yesod App where
 
         pc <- widgetToPageContent $ do
             addStylesheet $ StaticR css_bootstrap_css
+            addStylesheet $ StaticR css_fontawesome_min_css
             toWidgetHead $(luciusFile "templates/default-layout-wrapper.lucius")
             $(widgetFile "default-layout")
         withUrlRenderer $(hamletFile "templates/default-layout-wrapper.hamlet")
@@ -191,7 +205,8 @@ instance YesodBreadcrumbs App where
     breadcrumb UserR = return ("Cadastro", Just HomeR)
     breadcrumb BookListR = return ("Livros", Just HomeR)
     breadcrumb BookNewR = return ("Cadastrar Livro", Just BookListR)
-    --  ++ (fromString $ show bookid)
+    breadcrumb CategoryListR = return ("Categorias", Just HomeR)
+    breadcrumb CategoryNewR = return ("Cadastrar Categoria", Just CategoryListR)
     breadcrumb (BookR _) = return ("Livro", Just BookListR)
     breadcrumb  _ = return ("home", Nothing)
 
