@@ -1,13 +1,13 @@
-<h1>Livros
+<div .col-md-8 .col-xs-12>
+    <h1 .title>Livros
 
-$if isAdmin' == True
+<div .col-md-4 .col-xs-12>
     <a href=@{BookNewR} .btn.btn-primary.pull-right style="margin-bottom: 20px"> Cadastrar Livro
 
 $if length books == 0
-    <p> 
-        Não existem livros no momento
-        $if isAdmin' == False
-            , contate o administrador
+    <div .col-xs-12>
+        <p> 
+            Não existem livros no momento, insira um novo
 $else
     <table .table.table-striped.table-hover>
         <thead>

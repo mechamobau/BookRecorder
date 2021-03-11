@@ -18,7 +18,7 @@ getBookListR = do
             user   <- runDB $ selectFirst [UserEmail ==. email] []
             case user of
                 Nothing -> redirect HomeR
-                Just (Entity _ ( User _ _ _ isAdmin' )) -> 
+                Just _ -> 
                     defaultLayout $ do
                         setTitle "BookRecorder - Livros"
                         $(widgetFile "pages/book/list")
