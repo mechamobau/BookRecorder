@@ -4,54 +4,44 @@
 {-# LANGUAGE MultiParamTypeClasses #-}
 {-# LANGUAGE TypeFamilies #-}
 {-# LANGUAGE QuasiQuotes #-}
+
 module Handler.BookNew where
 
 import Import as I
 import Yesod.Form.Bootstrap3 (BootstrapFormLayout (..), renderBootstrap3)
+import Text.Lucius          (luciusFile)
 
-import Data.Text as T (pack)
-
--- Book
---     name                Text
---     isbn                Text
---     numberPages         Int
---     categoryId          CategoryId
-
-data NewBook = NewBook {
-        newBookName             :: Text
-    ,   newBookISBN             :: Text
-    ,   newBookNumberPages      :: Int
-    ,   newBookCategory         :: Key Category
+data FormBook = FormBook {
+        formBookName        :: Text
+    ,   formBookISBN        :: Text
+    ,   formBookNumberPages :: Int
+    ,   formBookCategory    :: Key Category
 }
 
--- formBook :: Form NewBook
-formBook :: [(Text, Key Category)] -> Form NewBook
-formBook categories = renderBootstrap3 BootstrapBasicForm $ NewBook
+formBook :: [(Text, Key Category)] -> Form FormBook
+formBook categories = renderBootstrap3 BootstrapBasicForm $ FormBook
     <$> areq textField (FieldSettings "Nome do livro" Nothing Nothing Nothing [("class", "form-control")]) Nothing
     <*> areq textField (FieldSettings "ISBN" Nothing Nothing Nothing [("class", "form-control")]) Nothing
     <*> areq intField (FieldSettings "Número de páginas" Nothing Nothing Nothing [("class", "form-control")]) Nothing
     <*> areq (selectFieldList categories) (FieldSettings "Categoria do Livro" Nothing Nothing Nothing [("class", "form-control")]) Nothing
 
-mapCategories :: [Entity Category] -> [(Text, Key Category)]
-mapCategories [] = []
-mapCategories xs = map (\(Entity eid (Category name)) -> (name, eid)) xs
-
--- (map (\(Entity id (Category name)) -> (name, id))
+mapCategoryNames :: [Entity Category] -> [(Text, Key Category)]
+mapCategoryNames [] = []
+mapCategoryNames xs = map tupleNameWithId xs
+    where tupleNameWithId (Entity eid (Category name)) = (name, eid)
 
 getBookNewR :: Handler Html
 getBookNewR = do    
-    -- books <- runDB $ selectList ([] :: [Filter Book]) []
     categories <- runDB $ selectList [] [Desc CategoryId]
-    -- muser <- lookupSession "_ID"
-    (formWidget, _) <- generateFormPost $ formBook $ mapCategories categories
+    (formWidget, _) <- generateFormPost $ formBook $ mapCategoryNames categories
 
     defaultLayout $ do
-        msg <- getMessage
         session <- lookupSession "_ID"
 
         case session of
             Just _ -> do
                 setTitle "BookRecorder - Cadastrar Livro"
+                toWidgetHead $(luciusFile "templates/default-layout-wrapper.lucius")
                 $(widgetFile "pages/book/new")
             Nothing -> redirect HomeR
     
@@ -59,21 +49,20 @@ getBookNewR = do
 postBookNewR :: Handler Html
 postBookNewR = do
     categories <- runDB $ selectList [] [Desc CategoryId]
-    ((result, _), _) <- runFormPost $ formBook $ mapCategories categories
+    ((result, _), _) <- runFormPost $ formBook $ mapCategoryNames categories
     case result of
         FormSuccess book -> do
-            book' <- runDB $ selectFirst [BookIsbn ==. (newBookISBN book)] []
+            book' <- runDB $ selectFirst [BookIsbn ==. (formBookISBN book)] []
             case book' of
                 Just _ -> redirect BookNewR
                 Nothing -> do
                     _ <- runDB $ insert400 (
                         Book 
-                        (newBookName book) 
-                        (newBookISBN book) 
-                        (newBookNumberPages book) 
-                        (Just $ T.pack "")
-                        (newBookCategory book)
+                        (formBookName book) 
+                        (formBookISBN book) 
+                        (formBookNumberPages book) 
+                        (Just $ pack "")
+                        (formBookCategory book)
                         )
                     redirect BookListR
-            -- _ <- runDB $ insert user
         _ -> redirect BookNewR
