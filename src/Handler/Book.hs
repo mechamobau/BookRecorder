@@ -12,32 +12,20 @@ import Yesod.Form.Bootstrap3 (BootstrapFormLayout (..), renderBootstrap3)
 import Text.Julius
 
 import Handler.BookList (showBookCategory)
+import Handler.BookNew  (FormBook (..), mapCategoryNames)
 
-data NewBook = NewBook {
-        newBookName             :: Text
-    ,   newBookISBN             :: Text
-    ,   newBookNumberPages      :: Int
-    ,   newBookCategory         :: Key Category
-}
-
-formBook :: Book -> [(Text, Key Category)] -> Form NewBook
-formBook book categories = renderBootstrap3 BootstrapBasicForm $ NewBook
+updateFormBook :: Book -> [(Text, Key Category)] -> Form FormBook
+updateFormBook book categories = renderBootstrap3 BootstrapBasicForm $ FormBook
     <$> areq textField (FieldSettings "Nome do livro" Nothing Nothing Nothing [("class", "form-control")]) (Just $ bookName book)
     <*> areq textField (FieldSettings "ISBN" Nothing Nothing Nothing [("class", "form-control")]) (Just $ bookIsbn book)
     <*> areq intField (FieldSettings "Número de páginas" Nothing Nothing Nothing [("class", "form-control")]) (Just $ bookNumberPages book)
     <*> areq (selectFieldList categories) (FieldSettings "Categoria do Livro" Nothing Nothing Nothing [("class", "form-control")]) (Just $ bookCategory book)
 
-mapCategories :: [Entity Category] -> [(Text, Key Category)]
-mapCategories [] = []
-mapCategories xs = map (\(Entity eid (Category name)) -> (name, eid)) xs
-
--- (map (\(Entity id (Category name)) -> (name, id))
-
 getBookR :: Key Book -> Handler Html
 getBookR bookid = do    
     book <- runDB $ get404 bookid
     categories <- runDB $ selectList [] [Desc CategoryId]
-    (formWidget, _) <- generateFormPost $ formBook book $ mapCategories categories
+    (formWidget, _) <- generateFormPost $ updateFormBook book $ mapCategoryNames categories
     muser <- lookupSession "_ID"    
     case muser of
         Nothing -> redirect HomeR
@@ -61,12 +49,12 @@ postBookR :: Key Book -> Handler Html
 postBookR bookid = do
     book <- runDB $ get404 bookid
     categories <- runDB $ selectList [] [Desc CategoryId]
-    ((result, _), _) <- runFormPost $ formBook book $ mapCategories categories
+    ((result, _), _) <- runFormPost $ updateFormBook book $ mapCategoryNames categories
+
     case result of
         FormSuccess book' -> do
-            _ <- runDB $ update bookid [BookName =. newBookName book', BookIsbn =. newBookISBN book', BookNumberPages =. newBookNumberPages book', BookCategory =. newBookCategory book']
+            _ <- runDB $ update bookid [BookName =. formBookName book', BookIsbn =. formBookISBN book', BookNumberPages =. formBookNumberPages book', BookCategory =. formBookCategory book']
             redirect BookListR
-            -- _ <- runDB $ insert user
         _ -> redirect $ BookR bookid
 
 deleteBookR :: Key Book -> Handler Value
